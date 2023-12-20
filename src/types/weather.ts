@@ -46,3 +46,5 @@ export type LocationWeather = {
   currentConditions: CurrentWeatherCondition,
   days: DailyWeather[],
 }
+
+export type Units = 'metric' | 'us';

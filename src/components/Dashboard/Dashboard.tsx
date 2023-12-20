@@ -4,7 +4,13 @@ import { CurrentConditions } from './CurrentConditions';
 import { HourlyForecast } from './HourlyForecast';
 import Alert from '@mui/joy/Alert';
 import Grid from '@mui/joy/Grid';
-import type { LocationWeather, CurrentWeatherCondition, Weather, DailyWeather } from '@/util/api';
+import type {
+  LocationWeather,
+  CurrentWeatherCondition,
+  Weather,
+  DailyWeather,
+  Units,
+} from '@/util/api';
 
 import { useState } from 'react';
 
@@ -19,6 +25,7 @@ const getHourlyForecast = (days: DailyWeather[]): Weather[] => {
   // remaining hours from the next day
 
   let startDay = 0; // the index of the days array to start at
+  // @todo: handle timezones for the requested location
   let currentHour = (new Date()).getHours() + 1;
   if (currentHour > 23) {
     currentHour = 0;
@@ -38,19 +45,19 @@ export default function Dashboard() {
   const [ city, setCity ] = useState('Sydney, Australia'); // @todo: remove default
   const [ currentConditions, setCurrentConditions ] = useState<CurrentWeatherCondition>(null);
   const [ errorMessage, setErrorMessage ] = useState<string>(null);
-  const [ forecast, setForecast ] = useState<Weather[]>(null); // @todo: remove default
+  const [ forecast, setForecast ] = useState<Weather[]>(null);
+  const [ resolvedAddress, setResolvedAddress ] = useState<string>(null);
+  const [ units, setUnits ] = useState<Units>('metric');
 
-  const onSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const loadResults = async () => {
     setErrorMessage(null);
     if (!city.trim()) {
-      // @todo: Show error message for invalid/empty value
+      setErrorMessage('Please enter a city');
       return;
     }
     setIsLoading(true);
     try {
-      const today = '2023-12-20T10:33:49.276Z';
-      // const today =  (new Date()).toISOString();
+      const today =  (new Date()).toISOString();
       const res: LocationWeather = await getWeather(city, today, FORECAST_HOURS);
 
       handleResponse(res);
@@ -62,18 +69,26 @@ export default function Dashboard() {
     }
   }
 
+  const onSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    loadResults();
+  }
+
   const onCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCity(e.target.value);
   }
 
-  const handleResponse = (weather: WeatherForecast) => {
+  const onUnitsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUnits(e.target.value);
+  }
 
+  const handleResponse = (weather: LocationWeather) => {
     const {
       icon, temp, conditions
-    } = weather.currentConditions
+    } = weather.currentConditions;
 
-    setCurrentConditions({ icon, temp, conditions })
-
+    setResolvedAddress(weather.resolvedAddress);
+    setCurrentConditions({ icon, temp, conditions });
     setForecast(getHourlyForecast(weather.days));
   }
 
@@ -86,16 +101,25 @@ export default function Dashboard() {
           onCityChange={onCityChange}
           city={city}
           isLoading={isLoading}
+          onUnitsChange={onUnitsChange}
+          units={units}
         />
         <Grid xs={12} spacing={2} className="weather" container>
           { errorMessage ? <Alert color="danger">{errorMessage}</Alert> : null }
           { !isLoading && currentConditions ?
             <>
               <Grid xs={12} spacing={1} className="current-conditions">
-                <CurrentConditions weather={currentConditions} />
+                <CurrentConditions
+                  weather={currentConditions}
+                  location={resolvedAddress}
+                  units={units}
+                />
               </Grid>
               <Grid xs={12} spacing={1} className="hourly-forecast" container>
-                <HourlyForecast forecast={forecast} />
+                <HourlyForecast
+                  forecast={forecast}
+                  units={units}
+                />
               </Grid>
             </>
           : null }
