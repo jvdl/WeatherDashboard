@@ -1,12 +1,8 @@
+import Dashboard from '@components/Dashboard'
 import './App.scss'
 
 function App() {
-
-  return (
-    <>
-      <h1>Hello world</h1>
-    </>
-  )
+  return <Dashboard />
 }
 
 export default App
