@@ -1,22 +1,30 @@
 import Box from '@mui/joy/Box';
-import Grid from '@mui/joy/Grid';
 import Button from '@mui/joy/Button';
-import Input from '@mui/joy/Input';
 import FormControl from '@mui/joy/FormControl';
-import FormLabel from '@mui/joy/FormLabel';
 import FormHelperText from '@mui/joy/FormHelperText';
+import FormLabel from '@mui/joy/FormLabel';
+import Grid from '@mui/joy/Grid';
+import Input from '@mui/joy/Input';
 import Radio from '@mui/joy/Radio';
 import RadioGroup from '@mui/joy/RadioGroup';
 
 export type ForecastFormProps = {
-  onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void;
-  onCityChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onUnitsChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   city: string;
-  units: 'metric' | 'us';
   isLoading: boolean;
+  onCityChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void;
+  onUnitsChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  units: 'metric' | 'us';
 }
-export const ForecastForm = ({ onSubmit, onCityChange, city, isLoading, onUnitsChange, units }: ForecastFormProps) => (
+
+export const ForecastForm = ({
+  city,
+  isLoading,
+  onCityChange,
+  onSubmit,
+  onUnitsChange,
+  units,
+}: ForecastFormProps) => (
   <form onSubmit={onSubmit} className="forecast-form">
 
     <FormControl>
